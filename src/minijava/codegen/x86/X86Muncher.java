@@ -41,6 +41,7 @@ public class X86Muncher extends Muncher
     // Pattern "variables" (used by the rules below)
     
     final Pat<IRExp>         _e_ = Pat.any();
+    final Pat<IRExp>         _f_ = Pat.any();
     final Pat<Temp>          _t_ = Pat.any();
     final Pat<Integer>       _i_ = Pat.any();
     
@@ -114,6 +115,42 @@ public class X86Muncher extends Muncher
       }
     });
     
+    // PLUS
+    em.add(new MunchRule<IRExp, Temp>(PLUS(_e_, _f_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        Temp d = m.munch(c.get(_e_));
+        m.emit(A_ADD_REG_REG(d, m.munch(c.get(_f_))));
+        return d;
+      }
+    });
+    
+    // MUL
+    em.add(new MunchRule<IRExp, Temp>(MUL(_e_, _f_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        Temp d = m.munch(c.get(_e_));
+        m.emit(A_MUL_REG_REG(d, m.munch(c.get(_f_))));
+        return d;
+      }
+    });
+    
+    // MEM
+    em.add(new MunchRule<IRExp, Temp>(MEM(_e_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        Temp res = new Temp();
+        m.emit(A_MEM(res, m.munch(c.get(_e_))));
+        return res;
+      }
+    });
+    
     // MEM MOVE
     sm.add(new MunchRule<IRStm, Void>(MOVE(MEM(TEMP(_t_)), _e_))
     {
@@ -166,6 +203,18 @@ public class X86Muncher extends Muncher
         list(reg));
   }
   
+  private static Instr A_ADD_REG_REG(Temp d, Temp s) {
+    return new A_OPER("addl    `s0, `d0", 
+        list(d),
+        list(s));
+  }
+  
+  private static Instr A_MUL_REG_REG(Temp d, Temp s) {
+    return new A_OPER("imul    `s0, `d0", 
+        list(d),
+        list(s));
+  }
+  
   private static Instr A_MOV(Temp d, Temp s) {
     return new A_MOVE("movl    `s0, `d0", d, s);
   }
@@ -188,6 +237,11 @@ public class X86Muncher extends Muncher
   private static Instr A_MOV_MEM(Temp d, Temp s)
   {
     return new A_MOVE("movl    `s0, (`d0)", d, s);
+  }
+  
+  private static Instr A_MEM(Temp d, Temp s)
+  {
+    return new A_MOVE("movl    (`s0), `d0", d, s);
   }
   
   /**

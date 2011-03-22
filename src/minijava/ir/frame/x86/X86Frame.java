@@ -1,5 +1,6 @@
 package minijava.ir.frame.x86;
 
+import junit.framework.Assert;
 import minijava.codegen.assem.Instr;
 import minijava.codegen.muncher.Muncher;
 import minijava.codegen.x86.X86Muncher;
@@ -132,14 +133,16 @@ public class X86Frame extends Frame {
   @Override
   public List<Instr> procEntryExit2(List<Instr> asmBody)
   {
-    // TODO Auto-generated method stub
-    return null;
+    // TODO Fix with correct implementation of procEntryExit2
+    Assert.assertNotNull(asmBody);
+    return asmBody;
   }
 
   @Override
   public Access getOutArg(int i)
   {
     // TODO Auto-generated method stub
+    Assert.fail("getOutArg not implemented");
     return null;
   }
 
@@ -147,6 +150,7 @@ public class X86Frame extends Frame {
   public List<Temp> registers()
   {
     // TODO Auto-generated method stub
+    Assert.fail("registers not implemented");
     return null;
   }
 
@@ -154,6 +158,7 @@ public class X86Frame extends Frame {
   public void entrySequence(IndentingWriter out)
   {
     // TODO Auto-generated method stub
+    out.println();
     
   }
 
@@ -161,6 +166,6 @@ public class X86Frame extends Frame {
   public void exitSequence(IndentingWriter out)
   {
     // TODO Auto-generated method stub
-    
+    out.println();
   }
 }

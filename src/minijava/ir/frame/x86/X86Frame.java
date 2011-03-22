@@ -2,6 +2,7 @@ package minijava.ir.frame.x86;
 
 import minijava.codegen.assem.Instr;
 import minijava.codegen.muncher.Muncher;
+import minijava.codegen.x86.X86Muncher;
 import minijava.ir.frame.Access;
 import minijava.ir.frame.Frame;
 import minijava.ir.interp.Interp;
@@ -125,8 +126,7 @@ public class X86Frame extends Frame {
   @Override
   public Muncher newMuncher()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return new X86Muncher(this);
   }
 
   @Override

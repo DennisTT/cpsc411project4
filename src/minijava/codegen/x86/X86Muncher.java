@@ -1,10 +1,8 @@
 package minijava.codegen.x86;
 
-import static minijava.codegen.patterns.IRPat.CONST;
-import static minijava.codegen.patterns.IRPat.MOVE;
-import static minijava.codegen.patterns.IRPat.PLUS;
-import static minijava.codegen.patterns.IRPat.TEMP;
+import static minijava.codegen.patterns.IRPat.*;
 import static minijava.util.List.list;
+import minijava.codegen.assem.A_LABEL;
 import minijava.codegen.assem.A_MOVE;
 import minijava.codegen.assem.A_OPER;
 import minijava.codegen.assem.Instr;
@@ -14,6 +12,7 @@ import minijava.codegen.muncher.MuncherRules;
 import minijava.codegen.patterns.Matched;
 import minijava.codegen.patterns.Pat;
 import minijava.ir.frame.Frame;
+import minijava.ir.temp.Label;
 import minijava.ir.temp.Temp;
 import minijava.ir.tree.IRExp;
 import minijava.ir.tree.IRStm;
@@ -45,6 +44,10 @@ public class X86Muncher extends Muncher
     final Pat<Temp>          _t_ = Pat.any();
     final Pat<Integer>       _i_ = Pat.any();
     
+    final Pat<Label>        _lab_ = Pat.any();
+    final Pat<List<IRExp>>  _es_  = Pat.any();
+    final Pat<IRExp>        _l_  = Pat.any();
+    
     // An example of a Stm muncher rule:
     sm.add(new MunchRule<IRStm, Void>( MOVE(TEMP(_t_), _e_) ) {
       @Override
@@ -53,7 +56,7 @@ public class X86Muncher extends Muncher
                   m.munch(c.get(_e_)) ));
         return null;
       }
-    }); 
+    });
     
     // An example of an Exp muncher rule
     em.add(new MunchRule<IRExp, Temp>(PLUS(_e_, CONST(_i_))) {
@@ -66,8 +69,93 @@ public class X86Muncher extends Muncher
       }
     });
     
-    //TODO: You'll need to add more rules...
+    // LABEL
+    sm.add(new MunchRule<IRStm, Void>(LABEL(_lab_))
+    {
+      @Override
+      protected Void trigger(Muncher m, Matched c)
+      {
+        m.emit(A_LABEL(c.get(_lab_)));
+        return null;
+      }
+    });
     
+    // CALL
+    em.add(new MunchRule<IRExp, Temp>(CALL(NAME(_lab_), _es_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        Label name = c.get(_lab_);
+        List<IRExp> args = c.get(_es_);
+        for(int i = args.size() - 1; i >= 0; --i)
+        {
+          // Munch argument and move to appropriate location
+          // TODO: Use frame.getOutArg(i) instead of new Temp()
+          m.emit(A_MOV(new Temp(), m.munch(args.get(i))));
+        }
+        
+        m.emit(A_CALL(name));
+        
+        // TODO: See if RV can be decoupled from X86Muncher using X86Frame
+        return new Temp("eax");
+      }
+    });
+    
+    // CONST
+    em.add(new MunchRule<IRExp, Temp>(CONST(_i_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        Temp num = new Temp();
+        m.emit(A_CONST(num, c.get(_i_)));
+        return num;
+      }
+    });
+    
+    // MEM MOVE
+    sm.add(new MunchRule<IRStm, Void>(MOVE(MEM(TEMP(_t_)), _e_))
+    {
+      @Override
+      protected Void trigger(Muncher m, Matched c)
+      {
+        m.emit(A_MOV_MEM(c.get(_t_), m.munch(c.get(_e_))));
+        return null;
+      }
+    });
+    
+    // MEM OFFSET MOVE
+    sm.add(new MunchRule<IRStm, Void>(MOVE(MEM(_l_), _e_))
+    {
+      @Override
+      protected Void trigger(Muncher m, Matched c)
+      {
+        m.emit(A_MOV_MEM(m.munch(c.get(_l_)), m.munch(c.get(_e_))));
+        return null;
+      }
+    });
+    
+    // TEMP
+    em.add(new MunchRule<IRExp, Temp>(TEMP(_t_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        return c.get(_t_);
+      }
+    });
+    
+    // EXP
+    sm.add(new MunchRule<IRStm, Void>(EXP(_e_))
+    {
+      @Override
+      protected Void trigger(Muncher m, Matched c)
+      {
+        m.munch(c.get(_e_));
+        return null;
+      }
+    });
   }
   
   ///////// Helper methods to generate X86 assembly instructions //////////////////////////////////////
@@ -80,6 +168,26 @@ public class X86Muncher extends Muncher
   
   private static Instr A_MOV(Temp d, Temp s) {
     return new A_MOVE("movl    `s0, `d0", d, s);
+  }
+  
+  private static Instr A_LABEL(Label l)
+  {
+    return new A_LABEL(l.toString() + ":\n", l);
+  }
+  
+  private static Instr A_CALL(Label l)
+  {
+    return new A_OPER("call    " + l.toString() + "\n", noTemps, noTemps);
+  }
+  
+  private static Instr A_CONST(Temp reg, int i)
+  {
+    return new A_OPER("movl    $" + i + ", `d0", list(reg), list(reg));
+  }
+  
+  private static Instr A_MOV_MEM(Temp d, Temp s)
+  {
+    return new A_MOVE("movl    `s0, (`d0)", d, s);
   }
   
   /**

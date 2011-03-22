@@ -181,6 +181,17 @@ public class X86Muncher extends Muncher
         return null;
       }
     });
+
+    // JUMP
+    sm.add(new MunchRule<IRStm, Void>(JUMP(NAME(_lab_)))
+    {
+      @Override
+      protected Void trigger(Muncher m, Matched c)
+      {
+        m.emit(A_JUMP(c.get(_lab_)));
+        return null;
+      }
+    });
   }
   
   ///////// Helper methods to generate X86 assembly instructions //////////////////////////////////////
@@ -230,6 +241,11 @@ public class X86Muncher extends Muncher
   private static Instr A_MEM(Temp d, Temp s)
   {
     return new A_MOVE("movl    (`s0), `d0", d, s);
+  }
+  
+  private static Instr A_JUMP(Label l)
+  {
+    return new A_OPER("jmp     `j0", null, null, list(l));
   }
   
   /**

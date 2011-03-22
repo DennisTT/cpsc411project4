@@ -126,6 +126,18 @@ public class X86Muncher extends Muncher
       }
     });
     
+    // MINUS
+    em.add(new MunchRule<IRExp, Temp>(MINUS(_e_, _f_))
+    {
+      @Override
+      protected Temp trigger(Muncher m, Matched c)
+      {
+        Temp d = m.munch(c.get(_e_));
+        m.emit(A_SUB_REG_REG(d, m.munch(c.get(_f_))));
+        return d;
+      }
+    });
+    
     // MUL
     em.add(new MunchRule<IRExp, Temp>(MUL(_e_, _f_))
     {
@@ -204,6 +216,12 @@ public class X86Muncher extends Muncher
   
   private static Instr A_ADD_REG_REG(Temp d, Temp s) {
     return new A_OPER("addl    `s0, `d0", 
+        list(d),
+        list(s));
+  }
+  
+  private static Instr A_SUB_REG_REG(Temp d, Temp s) {
+    return new A_OPER("subl    `s0, `d0", 
         list(d),
         list(s));
   }

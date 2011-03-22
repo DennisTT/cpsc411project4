@@ -47,7 +47,6 @@ public class X86Muncher extends Muncher
     
     final Pat<Label>        _lab_ = Pat.any();
     final Pat<List<IRExp>>  _es_  = Pat.any();
-    final Pat<IRExp>        _l_  = Pat.any();
     
     // An example of a Stm muncher rule:
     sm.add(new MunchRule<IRStm, Void>( MOVE(TEMP(_t_), _e_) ) {
@@ -152,23 +151,12 @@ public class X86Muncher extends Muncher
     });
     
     // MEM MOVE
-    sm.add(new MunchRule<IRStm, Void>(MOVE(MEM(TEMP(_t_)), _e_))
+    sm.add(new MunchRule<IRStm, Void>(MOVE(MEM(_f_), _e_))
     {
       @Override
       protected Void trigger(Muncher m, Matched c)
       {
-        m.emit(A_MOV_MEM(c.get(_t_), m.munch(c.get(_e_))));
-        return null;
-      }
-    });
-    
-    // MEM OFFSET MOVE
-    sm.add(new MunchRule<IRStm, Void>(MOVE(MEM(_l_), _e_))
-    {
-      @Override
-      protected Void trigger(Muncher m, Matched c)
-      {
-        m.emit(A_MOV_MEM(m.munch(c.get(_l_)), m.munch(c.get(_e_))));
+        m.emit(A_MOV_MEM(m.munch(c.get(_f_)), m.munch(c.get(_e_))));
         return null;
       }
     });

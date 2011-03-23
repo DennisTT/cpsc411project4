@@ -151,9 +151,9 @@ public class X86Frame extends Frame {
   @Override
   public Access getOutArg(int i)
   {
-    // TODO Auto-generated method stub
-    Assert.fail("getOutArg not implemented");
-    return null;
+    // The ith outgoing arguments is above local variables, the return address,
+    // and saved registers on the stack
+    return this.alloc(-(this.localCount + this.registers().size() + 1 + i) * this.wordSize());
   }
 
   @Override

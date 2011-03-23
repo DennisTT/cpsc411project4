@@ -1,6 +1,5 @@
 package minijava.ir.frame.x86;
 
-import junit.framework.Assert;
 import minijava.codegen.assem.A_OPER;
 import minijava.codegen.assem.Instr;
 import minijava.codegen.muncher.Muncher;

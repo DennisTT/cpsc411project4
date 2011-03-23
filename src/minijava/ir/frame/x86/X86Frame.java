@@ -143,9 +143,7 @@ public class X86Frame extends Frame {
   @Override
   public List<Instr> procEntryExit2(List<Instr> asmBody)
   {
-    // TODO Fix with correct implementation of procEntryExit2
-    Assert.assertNotNull(asmBody);
-    return asmBody.append(List.list((Instr)new A_OPER("", null, returnSink)));
+    return asmBody.append(List.list((Instr) new A_OPER("", null, returnSink)));
   }
 
   @Override

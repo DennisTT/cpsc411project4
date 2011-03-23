@@ -1,6 +1,7 @@
 package minijava.ir.frame.x86;
 
 import junit.framework.Assert;
+import minijava.codegen.assem.A_OPER;
 import minijava.codegen.assem.Instr;
 import minijava.codegen.muncher.Muncher;
 import minijava.codegen.x86.X86Muncher;
@@ -32,6 +33,8 @@ public class X86Frame extends Frame {
                       eip = new Temp("eip"),
                       esi = new Temp("esi"),
                       esp = new Temp("esp");
+  
+  private static List<Temp> returnSink = List.list(esp, eax);
   
   private int localCount = 0;
   
@@ -142,7 +145,7 @@ public class X86Frame extends Frame {
   {
     // TODO Fix with correct implementation of procEntryExit2
     Assert.assertNotNull(asmBody);
-    return asmBody;
+    return asmBody.append(List.list((Instr)new A_OPER("", null, returnSink)));
   }
 
   @Override

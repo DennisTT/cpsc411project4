@@ -136,7 +136,7 @@ public class X86Muncher extends Muncher
       protected Temp trigger(Muncher m, Matched c)
       {
         Temp d = m.munch(c.get(_e_));
-        m.emit(A_SUB_REG_REG(d, m.munch(c.get(_f_))));
+        m.emit(A_SUB(d, m.munch(c.get(_f_))));
         return d;
       }
     });
@@ -148,7 +148,7 @@ public class X86Muncher extends Muncher
       protected Temp trigger(Muncher m, Matched c)
       {
         Temp d = m.munch(c.get(_e_));
-        m.emit(A_MUL_REG_REG(d, m.munch(c.get(_f_))));
+        m.emit(A_MUL(d, m.munch(c.get(_f_))));
         return d;
       }
     });
@@ -218,7 +218,7 @@ public class X86Muncher extends Muncher
         String j = null;
         
         // Include instruction for determining jump condition flag
-        m.emit(A_SUB_REG_REG(m.munch(c.get(_f_)), m.munch(c.get(_e_))));
+        m.emit(A_SUB(m.munch(c.get(_f_)), m.munch(c.get(_e_))));
         
         switch(c.get(_op_))
         {
@@ -274,13 +274,13 @@ public class X86Muncher extends Muncher
         list(s));
   }
   
-  private static Instr A_SUB_REG_REG(Temp d, Temp s) {
+  private static Instr A_SUB(Temp d, Temp s) {
     return new A_OPER("subl    `s0, `d0", 
         list(d),
         list(s));
   }
   
-  private static Instr A_MUL_REG_REG(Temp d, Temp s) {
+  private static Instr A_MUL(Temp d, Temp s) {
     return new A_OPER("imul    `s0, `d0", 
         list(d),
         list(s));

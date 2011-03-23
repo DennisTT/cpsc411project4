@@ -23,8 +23,15 @@ public class X86Frame extends Frame {
   
   public static X86Frame factory = new X86Frame(null, null);
   
-  private static Temp fp = new Temp("ebp"),
-                      rv = new Temp("eax");
+  private static Temp eax = new Temp("eax"),
+                      ebp = new Temp("ebp"),
+                      ebx = new Temp("ebx"),
+                      ecx = new Temp("ecx"),
+                      edi = new Temp("edi"),
+                      edx = new Temp("edx"),
+                      eip = new Temp("eip"),
+                      esi = new Temp("esi"),
+                      esp = new Temp("esp");
   
   private int localCount = 0;
   
@@ -91,13 +98,13 @@ public class X86Frame extends Frame {
   @Override
   public IRExp FP()
   {
-    return IR.TEMP(fp);
+    return IR.TEMP(ebp);
   }
   
   @Override
   public IRExp RV()
   {
-    return IR.TEMP(rv);
+    return IR.TEMP(eax);
   }
   
   @Override
@@ -149,9 +156,7 @@ public class X86Frame extends Frame {
   @Override
   public List<Temp> registers()
   {
-    // TODO Auto-generated method stub
-    Assert.fail("registers not implemented");
-    return null;
+    return List.list(eax, ebp, ebx, ecx, edi, edx, eip, esi, esp);
   }
 
   @Override

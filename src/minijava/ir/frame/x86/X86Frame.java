@@ -151,9 +151,9 @@ public class X86Frame extends Frame {
   @Override
   public Access getOutArg(int i)
   {
-    // The ith outgoing arguments is above local variables, the return address,
-    // and saved registers on the stack
-    return this.alloc(-(this.localCount + this.registers().size() + 1 + i) * this.wordSize());
+    // The ith outgoing arguments is above local variables and saved registers 
+    // on the stack
+    return this.alloc(-(this.localCount + this.registers().size() + i) * this.wordSize());
   }
 
   @Override

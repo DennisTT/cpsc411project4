@@ -14,6 +14,7 @@ import minijava.codegen.patterns.Pat;
 import minijava.ir.frame.Frame;
 import minijava.ir.temp.Label;
 import minijava.ir.temp.Temp;
+import minijava.ir.tree.CJUMP.RelOp;
 import minijava.ir.tree.IRExp;
 import minijava.ir.tree.IRStm;
 import minijava.util.List;
@@ -45,8 +46,10 @@ public class X86Muncher extends Muncher
     final Pat<Temp>          _t_ = Pat.any();
     final Pat<Integer>       _i_ = Pat.any();
     
-    final Pat<Label>        _lab_ = Pat.any();
+    final Pat<Label>        _l_ = Pat.any();
+    final Pat<Label>        _m_ = Pat.any();
     final Pat<List<IRExp>>  _es_  = Pat.any();
+    final Pat<RelOp>        _op_  = Pat.any();
     
     // An example of a Stm muncher rule:
     sm.add(new MunchRule<IRStm, Void>( MOVE(TEMP(_t_), _e_) ) {
@@ -70,23 +73,23 @@ public class X86Muncher extends Muncher
     });
     
     // LABEL
-    sm.add(new MunchRule<IRStm, Void>(LABEL(_lab_))
+    sm.add(new MunchRule<IRStm, Void>(LABEL(_l_))
     {
       @Override
       protected Void trigger(Muncher m, Matched c)
       {
-        m.emit(A_LABEL(c.get(_lab_)));
+        m.emit(A_LABEL(c.get(_l_)));
         return null;
       }
     });
     
     // CALL
-    em.add(new MunchRule<IRExp, Temp>(CALL(NAME(_lab_), _es_))
+    em.add(new MunchRule<IRExp, Temp>(CALL(NAME(_l_), _es_))
     {
       @Override
       protected Temp trigger(Muncher m, Matched c)
       {
-        Label name = c.get(_lab_);
+        Label name = c.get(_l_);
         List<IRExp> args = c.get(_es_);
         for(int i = args.size() - 1; i >= 0; --i)
         {
@@ -195,12 +198,63 @@ public class X86Muncher extends Muncher
     });
 
     // JUMP
-    sm.add(new MunchRule<IRStm, Void>(JUMP(NAME(_lab_)))
+    sm.add(new MunchRule<IRStm, Void>(JUMP(NAME(_l_)))
     {
       @Override
       protected Void trigger(Muncher m, Matched c)
       {
-        m.emit(A_JUMP(c.get(_lab_)));
+        m.emit(A_JUMP(c.get(_l_)));
+        return null;
+      }
+    });
+
+    // CJUMP
+    sm.add(new MunchRule<IRStm, Void>(CJUMP(_op_, _e_, _f_, _l_, _m_))
+    {
+      @Override
+      protected Void trigger(Muncher m, Matched c)
+      {
+        Label l = c.get(_l_);
+        String j = null;
+        
+        // Include instruction for determining jump condition flag
+        m.emit(A_SUB_REG_REG(m.munch(c.get(_f_)), m.munch(c.get(_e_))));
+        
+        switch(c.get(_op_))
+        {
+          case EQ:
+          {
+            j = "je";
+          }
+          case GE:
+          {
+            j = "jge";
+          }
+          case GT:
+          {
+            j = "jg";
+          }
+          case LE:
+          {
+            j = "jle";
+          }
+          case LT:
+          {
+            j = "jl";
+            break;
+          }
+          case NE:
+          {
+            j = "jne";
+            break;
+          }
+        }
+        
+        // Include jump instruction for when the condition is true
+        m.emit(new A_OPER(j + "    `j0", null, null, list(l)));
+        
+        // Include fall-through jump instruction for when the condition is false
+        m.emit(A_JUMP(c.get(_m_)));
         return null;
       }
     });

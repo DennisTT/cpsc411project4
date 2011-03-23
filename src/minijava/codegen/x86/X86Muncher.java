@@ -91,17 +91,26 @@ public class X86Muncher extends Muncher
       {
         Label name = c.get(_l_);
         List<IRExp> args = c.get(_es_);
-        for(int i = args.size() - 1; i >= 0; --i)
+        Frame f = m.getFrame();
+        List<Temp> r = f.registers();
+        
+        // Save current registers to frame
+        for(int i = 0; i < r.size(); ++i)
+        {
+          m.emit(new A_OPER("pushl    `s0", null, list(r.get(i))));
+        }
+        
+        // Add arguments to frame in reverse order
+        int length = args.size();
+        for(int i = length - 1; i >= 0; --i)
         {
           // Munch argument and move to appropriate location
-          // TODO: Use frame.getOutArg(i) instead of new Temp()
-          m.emit(A_MOV(new Temp(), m.munch(args.get(i))));
+          m.emit(A_MOV(m.munch(f.getOutArg(length - i).exp(f.FP())), m.munch(args.get(i))));
         }
         
         m.emit(A_CALL(name));
         
-        // TODO: See if RV can be decoupled from X86Muncher using X86Frame
-        return new Temp("eax");
+        return m.munch(f.RV());
       }
     });
     

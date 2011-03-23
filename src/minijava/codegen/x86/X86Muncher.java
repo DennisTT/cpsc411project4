@@ -112,7 +112,7 @@ public class X86Muncher extends Muncher
       protected Temp trigger(Muncher m, Matched c)
       {
         Temp num = new Temp();
-        m.emit(A_CONST(num, c.get(_i_)));
+        m.emit(A_MOV_CONST(num, c.get(_i_)));
         return num;
       }
     });
@@ -160,7 +160,7 @@ public class X86Muncher extends Muncher
       protected Temp trigger(Muncher m, Matched c)
       {
         Temp res = new Temp();
-        m.emit(A_MEM(res, m.munch(c.get(_e_))));
+        m.emit(A_MEM_READ(res, m.munch(c.get(_e_))));
         return res;
       }
     });
@@ -171,7 +171,7 @@ public class X86Muncher extends Muncher
       @Override
       protected Void trigger(Muncher m, Matched c)
       {
-        m.emit(A_MOV_MEM(m.munch(c.get(_f_)), m.munch(c.get(_e_))));
+        m.emit(A_MEM_WRITE(m.munch(c.get(_f_)), m.munch(c.get(_e_))));
         return null;
       }
     });
@@ -290,6 +290,21 @@ public class X86Muncher extends Muncher
     return new A_MOVE("movl    `s0, `d0", d, s);
   }
   
+  private static Instr A_MOV_CONST(Temp reg, int c)
+  {
+    return new A_OPER("movl    $" + c + ", `d0", list(reg), list(reg));
+  }
+  
+  private static Instr A_MEM_WRITE(Temp d, Temp s)
+  {
+    return new A_MOVE("movl    `s0, (`d0)", d, s);
+  }
+  
+  private static Instr A_MEM_READ(Temp d, Temp s)
+  {
+    return new A_MOVE("movl    (`s0), `d0", d, s);
+  }
+  
   private static Instr A_LABEL(Label l)
   {
     return new A_LABEL(l.toString() + ":\n", l);
@@ -298,21 +313,6 @@ public class X86Muncher extends Muncher
   private static Instr A_CALL(Label l)
   {
     return new A_OPER("call    " + l.toString() + "\n", noTemps, noTemps);
-  }
-  
-  private static Instr A_CONST(Temp reg, int i)
-  {
-    return new A_OPER("movl    $" + i + ", `d0", list(reg), list(reg));
-  }
-  
-  private static Instr A_MOV_MEM(Temp d, Temp s)
-  {
-    return new A_MOVE("movl    `s0, (`d0)", d, s);
-  }
-  
-  private static Instr A_MEM(Temp d, Temp s)
-  {
-    return new A_MOVE("movl    (`s0), `d0", d, s);
   }
   
   private static Instr A_JUMP(Label l)

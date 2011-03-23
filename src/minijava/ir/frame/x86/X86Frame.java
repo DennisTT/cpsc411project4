@@ -34,7 +34,7 @@ public class X86Frame extends Frame {
                       esi = new Temp("esi"),
                       esp = new Temp("esp");
   
-  private static List<Temp> returnSink = List.list(esp, eax);
+  private static List<Temp> returnSink = List.list(eax, ebp, esp, ebx, esi, edi);
   
   private int localCount = 0;
   

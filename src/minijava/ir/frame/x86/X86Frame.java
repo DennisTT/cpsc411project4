@@ -165,15 +165,12 @@ public class X86Frame extends Frame {
   @Override
   public void entrySequence(IndentingWriter out)
   {
-    // TODO Auto-generated method stub
-    out.println();
-    
+    // Do nothing
   }
 
   @Override
   public void exitSequence(IndentingWriter out)
   {
-    // TODO Auto-generated method stub
-    out.println();
+    // Do nothing
   }
 }

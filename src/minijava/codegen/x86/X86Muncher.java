@@ -124,7 +124,7 @@ public class X86Muncher extends Muncher
       protected Temp trigger(Muncher m, Matched c)
       {
         Temp d = m.munch(c.get(_e_));
-        m.emit(A_ADD_REG_REG(d, m.munch(c.get(_f_))));
+        m.emit(A_ADD(d, m.munch(c.get(_f_))));
         return d;
       }
     });
@@ -268,7 +268,7 @@ public class X86Muncher extends Muncher
         list(reg));
   }
   
-  private static Instr A_ADD_REG_REG(Temp d, Temp s) {
+  private static Instr A_ADD(Temp d, Temp s) {
     return new A_OPER("addl    `s0, `d0", 
         list(d),
         list(s));

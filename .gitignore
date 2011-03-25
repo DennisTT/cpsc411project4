@@ -2,3 +2,4 @@ bin
 src/minijava/parser/jcc/*.java
 *.class
 .settings
+.DS_Store

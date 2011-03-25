@@ -13,4 +13,6 @@ please include a *brief* explanation here what you changed and why:
   
 Additional comments to the TA (if any): 
 
-  None
+  We had problems getting JUnit to run Test4Parse tests in the correct order
+  when running all tests for the project at once.  However if the Test4Parse
+  test suite is run independently, its tests pass.
